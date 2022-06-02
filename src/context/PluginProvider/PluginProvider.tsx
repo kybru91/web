@@ -1,6 +1,6 @@
 import { ChainAdapter, ChainAdapterManager } from '@shapeshiftoss/chain-adapters'
 import { ChainTypes } from '@shapeshiftoss/types'
-import { Plugin, PluginManager } from 'plugins'
+import { Plugin, PluginManager, registerPlugins } from 'plugins'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import React, { createContext } from 'react'
 import { useSelector } from 'react-redux'
@@ -20,8 +20,6 @@ type PluginProviderContextProps = {
   supportedChains: ChainTypes[]
   routes: Route[]
 }
-
-const activePlugins = ['bitcoin', 'cosmos', 'ethereum', 'foxPage', 'osmosis']
 
 // don't export me, access me through the getter
 let _chainAdapterManager: ChainAdapterManager | undefined
@@ -60,19 +58,9 @@ export const PluginProvider = ({ children }: PluginProviderProps): JSX.Element =
 
   useEffect(() => {
     ;(async () => {
-      pluginManager.clear()
-
-      for (const plugin of activePlugins) {
-        try {
-          pluginManager.register(await import(`../../plugins/${plugin}/index.tsx`))
-        } catch (e) {
-          moduleLogger.error(e, { fn: 'register' }, 'Register Plugins')
-        }
-      }
-
+      await registerPlugins()
       const plugins = pluginManager.entries()
       setPlugins(plugins)
-      moduleLogger.debug({ plugins }, 'Plugins Registration Completed')
     })()
   }, [pluginManager])
 
