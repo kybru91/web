@@ -1,19 +1,23 @@
 import * as envalid from 'envalid'
-import { bool } from 'envalid'
+import { bool, ValidatorSpec } from 'envalid'
 import forEach from 'lodash/forEach'
+import * as ta from 'type-assertions'
 
 import env from './env'
 
 const { cleanEnv, str, url } = envalid
 
+export type ValidatorSet = Record<string, envalid.ValidatorSpec<unknown>>
+export type ValidatorResult<T extends Record<string, envalid.ValidatorSpec<any>>> = {
+  [K in keyof T]: ReturnType<T[K]['_parse']>
+}
+
 // add validators for each .env variable
 // note env vars must be prefixed with REACT_APP_
-const validators = {
+const baseValidators = {
   REACT_APP_LOG_LEVEL: str({ default: 'info' }),
   REACT_APP_UNCHAINED_ETHEREUM_HTTP_URL: url(),
   REACT_APP_UNCHAINED_ETHEREUM_WS_URL: url(),
-  REACT_APP_UNCHAINED_BITCOIN_HTTP_URL: url(),
-  REACT_APP_UNCHAINED_BITCOIN_WS_URL: url(),
   REACT_APP_UNCHAINED_COSMOS_HTTP_URL: url(),
   REACT_APP_UNCHAINED_COSMOS_WS_URL: url(),
   REACT_APP_UNCHAINED_OSMOSIS_HTTP_URL: url(),
@@ -39,6 +43,7 @@ const validators = {
     default: 'https://boardroom.io/shapeshift/',
   }),
 }
+ta.assert<ta.Extends<typeof baseValidators, ValidatorSet>>()
 
 function reporter<T>({ errors }: envalid.ReporterOptions<T>) {
   forEach(errors, (err, key) => {
@@ -48,4 +53,5 @@ function reporter<T>({ errors }: envalid.ReporterOptions<T>) {
   })
 }
 
-export const getConfig = () => cleanEnv(env, validators, { reporter })
+export const getConfig = (validators: Record<string, ValidatorSpec<unknown>> = baseValidators) =>
+  cleanEnv(env, validators, { reporter })

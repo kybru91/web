@@ -1,62 +1,72 @@
-import { ChainAdapter } from '@shapeshiftoss/chain-adapters'
-import { ChainTypes } from '@shapeshiftoss/types'
+import type { ChainAdapter } from '@shapeshiftoss/chain-adapters'
+import type { ChainTypes } from '@shapeshiftoss/types'
+import { getConfig, ValidatorResult, ValidatorSet } from 'config'
+import type { ReadonlyDeep } from 'type-fest'
 import { logger } from 'lib/logger'
-import { FeatureFlags } from 'state/slices/preferencesSlice/preferencesSlice'
+import type { FeatureFlags } from 'state/slices/preferencesSlice/preferencesSlice'
 
-import { Route } from '../Routes/helpers'
+import type { Route } from '../Routes/helpers'
 
-const moduleLogger = logger.child({ namespace: ['PluginManager'] })
+export type RegistrablePlugin<T extends ValidatorSet = ValidatorSet> = {
+  register: (config: ValidatorResult<T>) => Plugin
+  configValidators: T
+}
 
-const activePlugins = ['bitcoin', 'cosmos', 'ethereum', 'foxPage', 'osmosis']
-
-export type Plugins = [chainId: string, chain: Plugin][]
-export type RegistrablePlugin = { register: () => Plugins }
-
-export interface Plugin {
-  name: string
+// We need plugins to be able to export (a register function that returns) a narrow (i.e. non-widened) type. The simplest
+// way to do this is for them to use "as const", but that will also turn the value Readonly and cause TypeScript to throw
+// a fit. As a workaround, we explicitly ask for the Readonly version here so plugins can use "as const".
+export type Plugin = ReadonlyDeep<{
   icon?: JSX.Element
   featureFlag?: keyof FeatureFlags
   providers?: {
-    chainAdapters?: Array<[ChainTypes, () => ChainAdapter<ChainTypes>]>
+    chainAdapters?: Partial<Record<ChainTypes, () => ChainAdapter<ChainTypes>>>
   }
   routes?: Route[]
-}
+}>
 
-export class PluginManager {
-  #pluginManager = new Map<string, Plugin>()
+type ActiveRegistrablePlugin = Awaited<
+  ReturnType<typeof import('./active_generated').getActivePlugins>
+>[number]
+type RegistrablePluginPluginType<T extends RegistrablePlugin<any>> = ReturnType<T['register']>
+type ActivePlugin = RegistrablePluginPluginType<ActiveRegistrablePlugin>
+type MaybeValueOf<T, U extends string> = U extends keyof T ? T[U] : never
+type DistributiveMaybeValueOf<T, U extends string> = T extends unknown ? MaybeValueOf<T, U> : never
+type DistributiveKeyOf<T> = T extends unknown ? keyof T : never
+type MaybeReturnType<T> = T extends (...args: any) => any ? ReturnType<T> : never
+export type PluginChainAdapterType = DistributiveKeyOf<
+  DistributiveMaybeValueOf<DistributiveMaybeValueOf<ActivePlugin, 'providers'>, 'chainAdapters'>
+>
+export type PluginChainAdapter<T extends PluginChainAdapterType = PluginChainAdapterType> =
+  T extends any
+    ? MaybeReturnType<
+        DistributiveMaybeValueOf<
+          DistributiveMaybeValueOf<
+            DistributiveMaybeValueOf<ActivePlugin, 'providers'>,
+            'chainAdapters'
+          >,
+          T
+        >
+      >
+    : never
 
-  clear(): void {
-    this.#pluginManager.clear()
-  }
-
-  register(plugin: RegistrablePlugin): void {
-    for (const [pluginId, pluginManifest] of plugin.register()) {
-      if (this.#pluginManager.has(pluginId)) {
-        throw new Error('PluginManager: Duplicate pluginId')
-      }
-      this.#pluginManager.set(pluginId, pluginManifest)
-    }
-  }
-
-  keys(): string[] {
-    return [...this.#pluginManager.keys()]
-  }
-
-  entries(): [string, Plugin][] {
-    return [...this.#pluginManager.entries()]
-  }
-}
+const moduleLogger = logger.child({ namespace: ['PluginManager'] })
 
 // @TODO - In the future we may want to create a Provider for this
 // if we need to support features that require re-rendering. Currently we do not.
-export const pluginManager = new PluginManager()
+export const pluginManager = new Set<Plugin>()
 
 export async function registerPlugins() {
   pluginManager.clear()
 
+  const activeGenerated: { getActivePlugins: () => Promise<RegistrablePlugin[]> } = await import(
+    // Explicitly type-widening this parameter allows type-checking to succeed
+    // even if the file hasn't been generated yet.
+    './active_generated' as string
+  )
+  const activePlugins = await activeGenerated.getActivePlugins()
   for (const plugin of activePlugins) {
     try {
-      pluginManager.register(await import(`./${plugin}/index.tsx`))
+      pluginManager.add(plugin.register(getConfig(plugin.configValidators)))
       moduleLogger.trace({ fn: 'registerPlugins', pluginManager, plugin }, 'Registered Plugin')
     } catch (e) {
       moduleLogger.error(e, { fn: 'registerPlugins', pluginManager }, 'Register Plugins')
@@ -65,6 +75,6 @@ export async function registerPlugins() {
 
   moduleLogger.debug(
     { pluginManager, plugins: pluginManager.keys() },
-    'Plugins Registration Completed',
+    'Plugin Registration Completed',
   )
 }

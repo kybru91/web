@@ -2,38 +2,35 @@ import { ethereum } from '@shapeshiftoss/chain-adapters'
 import { ChainTypes } from '@shapeshiftoss/types'
 import * as unchained from '@shapeshiftoss/unchained-client'
 import { getConfig } from 'config'
-import { Plugins } from 'plugins'
+import type { Plugin } from 'plugins'
+import * as ta from 'type-assertions'
 
-export function register(): Plugins {
-  return [
-    [
-      'ethereumChainAdapter',
-      {
-        name: 'ethereumChainAdapter',
-        providers: {
-          chainAdapters: [
-            [
-              ChainTypes.Ethereum,
-              () => {
-                const http = new unchained.ethereum.V1Api(
-                  new unchained.ethereum.Configuration({
-                    basePath: getConfig().REACT_APP_UNCHAINED_ETHEREUM_HTTP_URL,
-                  }),
-                )
+export const configValidators = {}
 
-                const ws = new unchained.ws.Client<unchained.ethereum.EthereumTx>(
-                  getConfig().REACT_APP_UNCHAINED_ETHEREUM_WS_URL,
-                )
+export function register() {
+  const out = {
+    name: 'ethereumChainAdapter',
+    providers: {
+      chainAdapters: {
+        [ChainTypes.Ethereum]: () => {
+          const http = new unchained.ethereum.V1Api(
+            new unchained.ethereum.Configuration({
+              basePath: getConfig().REACT_APP_UNCHAINED_ETHEREUM_HTTP_URL,
+            }),
+          )
 
-                return new ethereum.ChainAdapter({
-                  providers: { http, ws },
-                  rpcUrl: getConfig().REACT_APP_ETHEREUM_NODE_URL,
-                })
-              },
-            ],
-          ],
+          const ws = new unchained.ws.Client<unchained.ethereum.EthereumTx>(
+            getConfig().REACT_APP_UNCHAINED_ETHEREUM_WS_URL,
+          )
+
+          return new ethereum.ChainAdapter({
+            providers: { http, ws },
+            rpcUrl: getConfig().REACT_APP_ETHEREUM_NODE_URL,
+          })
         },
       },
-    ],
-  ]
+    },
+  } as const
+  ta.assert<ta.Extends<typeof out, Plugin>>()
+  return out
 }
