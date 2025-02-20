@@ -12,8 +12,15 @@ import {
   Stack,
   useDisclosure,
 } from '@chakra-ui/react'
-import { foxAssetId, foxOnArbitrumOneAssetId, foxOnGnosisAssetId } from '@shapeshiftoss/caip'
+import {
+  foxAssetId,
+  foxOnArbitrumOneAssetId,
+  foxOnGnosisAssetId,
+  fromAssetId,
+  toAccountId,
+} from '@shapeshiftoss/caip'
 import type { Asset } from '@shapeshiftoss/types'
+import { TransferType } from '@shapeshiftoss/unchained-client'
 import type { InterpolationOptions } from 'node-polyglot'
 import { useCallback, useMemo } from 'react'
 import { useTranslate } from 'react-polyglot'
@@ -22,13 +29,19 @@ import { AnimatedCheck } from 'components/AnimatedCheck'
 import { AssetIcon } from 'components/AssetIcon'
 import { SlideTransition } from 'components/SlideTransition'
 import { Text } from 'components/Text'
+import { useTxDetails, useTxDetailsQuery } from 'hooks/useTxDetails/useTxDetails'
 import { bnOrZero } from 'lib/bignumber/bignumber'
+import { fromBaseUnit } from 'lib/math'
 import {
+  selectActiveQuote,
+  selectConfirmedTradeExecution,
   selectFirstHop,
+  selectIsActiveQuoteMultiHop,
   selectLastHop,
   selectTradeQuoteAffiliateFeeAfterDiscountUserCurrency,
   selectTradeQuoteAffiliateFeeDiscountUserCurrency,
 } from 'state/slices/tradeQuoteSlice/selectors'
+import { serializeTxIndex } from 'state/slices/txHistorySlice/utils'
 import { useAppSelector } from 'state/store'
 
 import { TwirlyToggle } from '../TwirlyToggle'
@@ -44,7 +57,7 @@ export type TradeSuccessProps = {
   sellAsset?: Asset
   buyAsset?: Asset
   sellAmountCryptoPrecision?: string
-  buyAmountCryptoPrecision?: string
+  quoteBuyAmountCryptoPrecision?: string
 }
 
 export const TradeSuccess = ({
@@ -56,9 +69,11 @@ export const TradeSuccess = ({
   sellAmountCryptoPrecision,
   sellAsset,
   buyAsset,
-  buyAmountCryptoPrecision,
+  quoteBuyAmountCryptoPrecision,
 }: TradeSuccessProps) => {
   const translate = useTranslate()
+  const tradeQuote = useAppSelector(selectActiveQuote)
+  const receiveAddress = tradeQuote!.receiveAddress
 
   const { isOpen, onToggle: handleToggle } = useDisclosure({
     defaultIsOpen: false,
@@ -66,6 +81,8 @@ export const TradeSuccess = ({
 
   const firstHop = useAppSelector(selectFirstHop)
   const lastHop = useAppSelector(selectLastHop)
+  const tradeExecution = useAppSelector(selectConfirmedTradeExecution)
+  const isMultiHop = useAppSelector(selectIsActiveQuoteMultiHop)
 
   const feeSavingUserCurrency = useAppSelector(selectTradeQuoteAffiliateFeeDiscountUserCurrency)
 
@@ -76,9 +93,47 @@ export const TradeSuccess = ({
   const hasFeeSaving = !bnOrZero(feeSavingUserCurrency).isZero()
   const couldHaveReducedFee = !hasFeeSaving && !bnOrZero(affiliateFeeUserCurrency).isZero()
 
+  // Get the actual received amount from the buy transaction *if* we can
+  // i.e if this isn't a swap to a manual receive addy
+  const buyTxId = useMemo(() => {
+    if (!tradeExecution || !buyAsset || !receiveAddress) return
+
+    const txHash = isMultiHop
+      ? tradeExecution.secondHop?.swap?.buyTxHash
+      : tradeExecution.firstHop?.swap?.buyTxHash
+
+    if (!txHash) return
+
+    const { chainId } = fromAssetId(buyAsset.assetId)
+
+    const accountId = toAccountId({
+      chainId,
+      account: receiveAddress,
+    })
+
+    return serializeTxIndex(accountId, txHash, receiveAddress)
+  }, [tradeExecution, isMultiHop, buyAsset, receiveAddress])
+
+  const txTransfers = useTxDetails(buyTxId ?? '')?.transfers
+  const manualReceiveAddressTransfers = useTxDetailsQuery(buyTxId ?? '')?.transfers
+  const transfers = manualReceiveAddressTransfers || txTransfers
+
+  const actualBuyAmountCryptoPrecision = useMemo(() => {
+    if (!transfers?.length || !buyAsset) return undefined
+
+    const receiveTransfer = transfers.find(
+      transfer => transfer.type === TransferType.Receive && transfer.assetId === buyAsset.assetId,
+    )
+    return receiveTransfer?.value
+      ? fromBaseUnit(receiveTransfer.value, buyAsset.precision)
+      : undefined
+  }, [transfers, buyAsset])
+
   const AmountsLine = useCallback(() => {
     if (!(sellAsset && buyAsset)) return null
-    if (!(sellAmountCryptoPrecision && buyAmountCryptoPrecision)) return null
+    if (!(sellAmountCryptoPrecision && quoteBuyAmountCryptoPrecision)) return null
+
+    const displayAmount = actualBuyAmountCryptoPrecision || quoteBuyAmountCryptoPrecision
 
     return (
       <Flex justifyContent='center' alignItems='center' flexWrap='wrap' gap={2} px={4}>
@@ -93,15 +148,17 @@ export const TradeSuccess = ({
         <Icon as={ArrowForwardIcon} boxSize={4} color='text.subtle' />
         <Flex alignItems='center' gap={2}>
           <AssetIcon size='xs' assetId={buyAsset?.assetId} />
-          <Amount.Crypto
-            whiteSpace='nowrap'
-            value={buyAmountCryptoPrecision}
-            symbol={buyAsset.symbol}
-          />
+          <Amount.Crypto whiteSpace='nowrap' value={displayAmount} symbol={buyAsset.symbol} />
         </Flex>
       </Flex>
     )
-  }, [sellAsset, buyAsset, sellAmountCryptoPrecision, buyAmountCryptoPrecision])
+  }, [
+    sellAsset,
+    buyAsset,
+    sellAmountCryptoPrecision,
+    quoteBuyAmountCryptoPrecision,
+    actualBuyAmountCryptoPrecision,
+  ])
 
   // NOTE: This is a temporary solution to enable the Fox discount summary only if the user did NOT
 
@@ -124,7 +181,7 @@ export const TradeSuccess = ({
 
   return (
     <>
-      <CardBody pb={0} px={0}>
+      <CardBody pb={4} px={0}>
         <SlideTransition>
           <Flex flexDir='column' alignItems='center' textAlign='center' py={8} gap={6}>
             <Stack alignItems='center'>
@@ -151,7 +208,7 @@ export const TradeSuccess = ({
           <Divider />
           <CardFooter flexDir='column' gap={2} px={8}>
             <SlideTransition>
-              <HStack width='full' justifyContent='space-between' mt={4}>
+              <HStack width='full' justifyContent='space-between'>
                 <Button variant='link' onClick={handleToggle} px={2}>
                   {translate(summaryTranslation)}
                 </Button>

@@ -62,7 +62,6 @@
     "seeAll": "Ver tudo",
     "darkMode": "Modo noturno",
     "darkTheme": "Tema Escuro",
-    "lightTheme": "Tema Claro",
     "rename": "Renomear",
     "forget": "Esqueceu?",
     "pending": "Pendente",
@@ -189,7 +188,9 @@
     "update": "Atualização",
     "apy": "APY",
     "tbd": "TBD",
-    "installed": "Instalado"
+    "installed": "Instalado",
+    "others": "Outros",
+    "hardwareWallets": "Hardware Wallets"
   },
   "consentBanner": {
     "body": {
@@ -274,7 +275,7 @@
     "routeTitle": "Comprar ou Vender",
     "routeTitleForGem": "Gem on Ramp",
     "title": "Compre ou venda criptomoedas",
-    "titleMessage": "A ShapeShift possui parceria com provedores de moeda fiduciária para compra e venda de criptomoedas.",
+    "titleMessage": "Você pode %{action} %{asset} usando:",
     "banxa": "Banxa",
     "mtPelerin": "Mt Pelerin",
     "onRamper": "OnRamper",
@@ -584,7 +585,7 @@
     "staking": "Poupança",
     "itWillTake": "Vai levar",
     "toUnlock": "para desbloquear seu %{assetSymbol} depois de remover seu staking. As recompensas precisarão ser retiradas separadamente.",
-    "assetStakingBalance": "Saldo em Staking %{assetName}"
+    "assetStakingBalance": "Saldo em Staking %{assetSymbol}"
   },
   "navBar": {
     "home": "Início",
@@ -1003,7 +1004,9 @@
     "tradeComplete": "Agora você tem %{cryptoAmountFormatted} em sua carteira na %{chainName}.",
     "doAnotherTrade": "Faça outra negociação",
     "summary": "Resumo de Trades",
+    "estimatedCompletionTime": "Tempo estimado de conclusão",
     "transactionSuccessful": "Transação bem-sucedida, aguardando confirmações",
+    "thorchainSwapperVolatilityAcknowledgementMessage": "O protocolo THORCHain está passando por volatilidade. Prossiga com cautela extra e considere rotas adicionais disponíveis.",
     "temp": {
       "tradeSuccess": "Negociação concluída",
       "tradeComplete": "%{symbol} recebido com sucesso em %{chainName}."
@@ -1048,6 +1051,9 @@
     "placeOrderSuccess": "Sucesso!",
     "placeOrderFailed": "Algo deu errado",
     "placeOrder": "Colocar ordem",
+    "placeAnotherOrder": "Faça outro ordem",
+    "orderSummary": "Resumo das ordens",
+    "success": "Ordem limite colocada com sucesso",
     "cancel": {
       "cancelOrder": "Cancelar Ordem Limite",
       "requestCancellation": "Sim, pedir cancelamento",
@@ -1072,6 +1078,10 @@
     "noOpenOrders": "Ainda não há ordens abertas.",
     "noHistoricalOrders": "Nenhum histórico de ordens ainda.",
     "limitPriceIsPercentLowerThanMarket": "O preço limite é %{percent}% menor que o preço de mercado",
+    "awaitingOrderPlacement": "Aguardando colocação do pedido em %{swapperName}",
+    "awaitingAllowanceApproval": "Aguardando aprovação da permissão",
+    "awaitingAllowanceReset": "Aguardando redefinição da permissão",
+    "orderPlacement": "Coloque a ordem %{swapperName}",
     "expiryOption": {
       "oneHour": "1 hora",
       "oneDay": "1 dia",
@@ -1697,6 +1707,9 @@
       "dontAskAgain": "Não pergunte novamente",
       "multiAccountUnsupported": "Multi-contas não são suportadas para esta rede usando o Multichain Snap na MetaMask"
     },
+    "coinbaseQR": {
+      "name": "Coinbase Connect"
+    },
     "metaMaskSnapConfirm": {
       "title": "Instale o Multichain Snap",
       "updateTitle": "Atualizar Multichain Snap",
@@ -1766,7 +1779,7 @@
         "secretRecoveryPhraseRequired": "A Frase Secreta de Recuperação é obrigatória",
         "secretRecoveryPhraseTooShort": "Frase Secreta de Recuperação é curta demais",
         "dragAndDrop": "Arraste e solte ou escolha o arquivo",
-        "keystoreImportBody": "Faça upload do arquivo clicando em procurar ou arrastando e soltando abaixo.",
+        "keystoreImportBody": "Importe o arquivo clicando em Procurar ou arrastando e soltando-o abaixo.",
         "importKeystore": "Importar Keystore",
         "invalidKeystorePassword": "Senha do keystore inválida"
       },
@@ -1789,14 +1802,14 @@
         "selectHeader": "Importar Carteira",
         "keystoreHeader": "Carteira Keystore",
         "body": "Você pode ter várias carteiras ShapeShift. Crie, carregue ou importe uma nova carteira utilizando sua Frase de Recuperação Secreta.",
-        "selectBody": "Importe a carteira usando sua Frase Secreta de Recuperação ou enviando seu arquivo keystore.",
+        "selectBody": "Importe a carteira usando sua Frase Secreta de Recuperação ou carregando seu arquivo keystore.",
         "import": "Importar carteira",
         "secretRecoveryPhrase": "Frase secreta de recuperação",
         "twelveWordSeedPhrase": "Seed phrase de 12 palavras",
         "keystore": "Keystore",
         "create": "Criar nova carteira",
         "load": "Carteiras salvas",
-        "uploadKeystore": "Carregar arquivo Keystore"
+        "importKeystore": "Importar arquivo Keystore"
       },
       "success": {
         "encryptingWallet": "Criptografando sua carteira... Caso seu navegador solicitar armazenamento persistente, clique em 'Permitir'.",
@@ -1873,14 +1886,13 @@
         "skip": "Pular",
         "shapeshiftWallet": "Carteira ShapeShift",
         "createNewWallet": "Criar uma nova carteira",
-        "shapeshiftNative": "Nativo ShapeShift",
         "addNewWallet": "Adicionar nova carteira",
         "comingFromThorswap": "Vindo do THORSwap?",
         "importExisting": "Importar existente",
         "importFromKeystore": "Importar do keystore",
         "whatIsShapeshiftWallet": "O que é a ShapeShift Wallet?",
         "yourDecentralizedGateway": "Seu gateway de descentralização. Negocie e ganhe Bitcoin, Ethereum, Solana e mais de uma carteira única e segura.",
-        "crossChainFreedom": "Liberdade entre redes. Acesse as melhores taxas em várias bolsas descentralizadas, sem intermediários necessários",
+        "crossChainFreedom": "Liberdade entre redes. Acesse as melhores taxas em várias exchanges descentralizadas, sem necessidade de intermediários.",
         "selfCustody": {
           "title": "Auto-custódia",
           "subTitle": "Você tem suas chaves e é o único que pode acessá-las.",
@@ -2256,7 +2268,7 @@
           "invalidUri": "URL inválido",
           "v1UriUnsupported": "URL da WalletConnect V1não habilitado",
           "v2UriUnsupported": "URL da WalletConnect V2 não habilitado",
-          "disclaimerBody": "A Shapeshift não pode garantir a segurança ou proteção de aplicativos de terceiros. Ao usar o WalletConnect, você assume total responsabilidade por quaisquer riscos envolvidos."
+          "disclaimerBody": "A ShapeShift não pode garantir a segurança ou proteção de aplicativos de terceiros. Ao usar o WalletConnect, você assume total responsabilidade por quaisquer riscos envolvidos."
         },
         "sessionProposal": {
           "dAppInfo": "Informação do dApp",
@@ -2380,6 +2392,8 @@
     "pool": "Pool",
     "poolDepth": "Liquidez da pool",
     "poolDepthDescription": "A saúda da pool",
+    "status": "Status",
+    "statusDescription": "O estado da pool",
     "totalDebtBalance": "Débito Total",
     "totalDebtBalanceDescription": "Saldo acumulado da dívida no pool de empréstimos",
     "totalCollateral": "Colateral Total",
@@ -2730,7 +2744,8 @@
     "emissionsPool": "%{symbol} Emissões da Pool (Nesta Época)",
     "emissionsPoolHelper": "O valor total de recompensas a serem distribuídas %{symbol} stakers",
     "foxBurnAmount": "Quantidade de queima da FOX (nesta época)",
-    "pendingDistribution": "Distribuição pendente"
+    "pendingDistribution": "Distribuição pendente",
+    "selectRuneAddress": "Selecione um endereço RUNE"
   },
   "markets": {
     "recommended": "Recomendado",
@@ -2797,11 +2812,12 @@
     },
     "foxWifHat": {
       "title": "FOX Wif Hat",
-      "description": "É só FOX com um chapéu, não pense demais. Aproveite um programa de desconto on-chain por tempo limitado. Conforme seu desconto diminui, aprenda sobre FOX no resto da página e troque para FOX a qualquer momento para preservar seu desconto de taxa. Qualquer holding que for maior economiza seu dinheiro na plataforma ShapeShift.",
-      "discount": "*O desconto diminui linearmente ao longo do tempo, expirando em XX/XX/2025. Aproveite seu desconto de XX% antes que ele diminua ainda mais!",
+      "description": "Resgate seu FOXwifhat. Aja rápido - os descontos diminuem com o tempo. Quanto mais FOX ou FOXwifhat você tiver, mais você economiza. Acumule mais tokens FOX para economias contínuas, além de compartilhamento de receita, governança e vantagens de yield farming. Saiba mais sobre esses programas no restante desta página.",
+      "discount": "*O desconto diminui linearmente ao longo do tempo, expirando em %{date}. Aproveite seu desconto de %{percent}% antes que ele diminua ainda mais!",
       "claim": "Resgate",
       "claimed": "Resgatado",
-      "discountText": "*%{percent}% de desconto em taxas de trading"
+      "discountText": "*%{percent}% de desconto em taxas de trading",
+      "noClaims": "Nenhum resgate disponível"
     },
     "governance": {
       "title": "Governança",
@@ -2827,7 +2843,7 @@
       "getAddress": "Falha ao obter endereço da carteira.",
       "getAccount": "Falha ao obter conta para: %{pubkey}.",
       "switchChainUnsupported": "A carteira não suporta troca de redes.",
-      "switchChainFailed": "Falha ao alternar a rede de carteira para %{chain}.",
+      "switchChainFailed": "Falha ao alternar a rede da carteira. Tente alternar manualmente a cadeia ativa da carteira para %{chain}.",
       "buildTransaction": "Falha ao construir transação.",
       "signTransaction": "Falha ao assinar a transação.",
       "signAndBroadcastTransaction": "Falha ao assinar e transmitir a transação.",

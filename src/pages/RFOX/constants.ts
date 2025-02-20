@@ -13,7 +13,7 @@ export const withdrawEvent = getAbiItem({ abi: RFOX_ABI, name: 'Withdraw' })
 
 export const IPFS_GATEWAY = 'https://gateway.shapeshift.com/ipfs'
 
-export const CURRENT_EPOCH_IPFS_HASH = 'QmX5kgfHFM99BfaP3So2CXRBnRzZepinfjHNyRzvuXYUP5'
+export const CURRENT_EPOCH_IPFS_HASH = 'QmPvpBtGzaQwcmqA3LFk9eqNHmZFh4ENwWZxMQiioMsw2v'
 export const RFOX_STAKING_ASSET_IDS = [foxOnArbitrumOneAssetId, uniV2EthFoxArbitrumAssetId]
 
 const client = viemClientByNetworkId[arbitrum.id]

@@ -25,6 +25,7 @@ export const fetchPortalsTokens = async ({
   chainIds,
   page = 0,
   accTokens = [],
+  minApy,
   sortBy,
   sortDirection,
   limit = 250,
@@ -32,6 +33,7 @@ export const fetchPortalsTokens = async ({
   chainIds: ChainId[] | undefined
   page?: number
   accTokens?: TokenInfo[]
+  minApy?: string
   sortBy?:
     | 'key'
     | 'decimals'
@@ -81,6 +83,7 @@ export const fetchPortalsTokens = async ({
       page: page.toString(),
       sortBy,
       sortDirection,
+      minApy,
     }
 
     await throttle()
@@ -252,6 +255,8 @@ export const getPortalTokens = async (
   const portalsPlatforms = await queryClient.fetchQuery({
     queryFn: () => fetchPortalsPlatforms(),
     queryKey: ['portalsPlatforms'],
+    // This should effectively be considered static as far as the lifecycle of the app/our usage is concerned
+    staleTime: Infinity,
   })
   const chainId = nativeAsset.chainId
 

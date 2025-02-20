@@ -11,10 +11,12 @@
     "and": "and",
     "balance": "Balance",
     "next": "Next",
+    "edit": "Edit",
     "error": "Error",
     "show": "Show",
     "account": "Account",
     "address": "Address",
+    "noThanks": "No Thanks",
     "done": "Done",
     "cancel": "Cancel",
     "close": "Close",
@@ -62,7 +64,6 @@
     "seeAll": "See All",
     "darkMode": "Dark Mode",
     "darkTheme": "Dark Theme",
-    "lightTheme": "Light Theme",
     "rename": "Rename",
     "forget": "Forget?",
     "pending": "Pending",
@@ -139,6 +140,8 @@
     "needAsset": "Need some %{asset}?",
     "buyNow": "Buy Now",
     "manage": "Manage",
+    "view": "View",
+    "viewOnly": "View-Only",
     "selectedAccount": "Selected Account",
     "allChains": "All Chains",
     "wallet": "Wallet",
@@ -191,7 +194,8 @@
     "tbd": "TBD",
     "installed": "Installed",
     "others": "Others",
-    "hardwareWallets": "Hardware Wallets"
+    "hardwareWallets": "Hardware Wallets",
+    "viewOnly": "View-Only"
   },
   "consentBanner": {
     "body": {
@@ -527,8 +531,6 @@
     "poolValue": "Pool Value",
     "yearn": "Yearn Finance",
     "totalValue": "Total Value",
-    "byAsset": "By Asset",
-    "byProvider": "By Provider",
     "claimableRewards": "Claimable Rewards",
     "stakingPosition": "Staking Position",
     "liquidityPool": "Liquidity Pool",
@@ -589,6 +591,8 @@
     "assetStakingBalance": "%{assetSymbol} Staking Balance"
   },
   "navBar": {
+    "thorchain": "THORChain",
+    "fox": "fox",
     "home": "Home",
     "activity": "Activity",
     "myWallet": "My Wallet",
@@ -623,7 +627,7 @@
     "lending": "Lending",
     "pools": "Pools",
     "rFOX": "rFOX",
-    "foxBenefits": "FOX Benefits",
+    "foxEcosystem": "FOX Ecosystem",
     "markets": "Markets",
     "actionMenu": {
       "send": {
@@ -1005,7 +1009,9 @@
     "tradeComplete": "You now have %{cryptoAmountFormatted} in your wallet on %{chainName}.",
     "doAnotherTrade": "Do another trade",
     "summary": "Trade Summary",
+    "estimatedCompletionTime": "Estimated Completion Time",
     "transactionSuccessful": "Transaction successful, waiting for confirmations",
+    "thorchainSwapperVolatilityAcknowledgementMessage": "The THORCHain protocol is experiencing volatility. Proceed with extra caution and consider additional available routes.",
     "temp": {
       "tradeSuccess": "Trade complete",
       "tradeComplete": "Successfully received %{symbol} on %{chainName}."
@@ -1236,6 +1242,13 @@
         "menuItem": "Back up my wallet",
         "enterPassword": "Enter your password to continue",
         "testTitle": "Verify Your Secret Recovery Phrase",
+        "title": "Confirm Backup",
+        "description": "Complete this quick test to confirm you’ve saved everything correctly.",
+        "confirm": {
+          "title": "Backup wallet",
+          "body": "Before you forget your wallet, would you like to back up your secret recovery phrase?",
+          "backupNow": "Backup Now"
+        },
         "info": {
           "title": "Your Secret Recovery Phrase",
           "description": "Write these 12 words down and store them securely offline. This 12 word phrase is used to recover your wallet private keys.",
@@ -1762,12 +1775,15 @@
         "error": {
           "delete": "Unable to delete your wallet, sorry.",
           "noWallet": "You have no saved wallets",
-          "pair": "Unable to pair your wallet"
+          "pair": "Unable to pair your wallet",
+          "fetchingWallets": "An error occurred while fetching wallets."
         },
         "header": "Saved Wallets",
         "body": "Loading your saved wallet... Enter your password when prompted.",
         "button": "Continue",
-        "confirmForget": "Are you sure you want to forget %{wallet}?"
+        "forgetWallet": "Forget Wallet",
+        "confirmForget": "Are you sure you want to forget %{wallet}?",
+        "confirmForgetBody": "You will not be able to access your wallet if you have not backed it up."
       },
       "import": {
         "header": "Import your wallet",
@@ -1851,6 +1867,7 @@
         "header": "Rename your wallet",
         "walletName": "New nickname for your wallet",
         "body": "Enter the new nickname of your wallet and your password to decrypt your wallet.",
+        "mobileBody": "Enter the new nickname of your wallet.",
         "button": "Next",
         "confirmDelete": "Are you sure you want to delete the nickname of this wallet?"
       },
@@ -1885,7 +1902,7 @@
         "skip": "Skip",
         "shapeshiftWallet": "ShapeShift Wallet",
         "createNewWallet": "Create a new wallet",
-        "shapeshiftNative": "ShapeShift Native",
+        "shapeshiftNative": "ShapeShift Wallet",
         "addNewWallet": "Add new wallet",
         "comingFromThorswap": "Coming from THORSwap?",
         "importExisting": "Import existing",
@@ -1941,6 +1958,39 @@
           "noWallet": "You have no saved wallets",
           "pair": "Unable to pair your wallet"
         }
+      }
+    },
+    "create": {
+      "header": "Give your wallet a name",
+      "subHeader": "Choose a nickname for your wallet",
+      "walletName": "My New Wallet",
+      "saveLocally": "Your nickname is saved locally to your device.",
+      "visibleToYou": "It will only be visible to you.",
+      "button": "Continue"
+    },
+    "keepSafe": {
+      "headerStart": "Keep your",
+      "headerSecret": "Secret",
+      "headerEnd": "Recovery Phrase Safe",
+      "subHeader": "Ensuring the safety of your Secret Recovery Phrase is crucial.",
+      "description": "Treat your Secret Recovery Phrase like you would your most valuable possession – keep it secure at all times. A password manager is great security, writing the words down is even better.",
+      "bulletPoints": {
+        "share": "Don't share it with anyone else",
+        "lose": "If you lose it, we can't recover it"
+      },
+      "button": "Continue to Backup"
+    },
+    "manualBackup": {
+      "header": "Manual Backup",
+      "subHeader": "Save your Secret Recovery Phrase in a secure place that only you control.",
+      "copyToClipboard": "Copy to clipboard",
+      "copied": "Copied!",
+      "nextStep": "Next you'll be asked to confirm the positions of certain words in your Secret Recovery Phrase.",
+      "button": "Continue backup",
+      "success": {
+        "title": "Manual Backup Complete",
+        "description": "Your wallet has been successfully backed up.",
+        "viewWallet": "View Wallet"
       }
     }
   },
@@ -2268,7 +2318,7 @@
           "invalidUri": "Invalid URI",
           "v1UriUnsupported": "WalletConnect V1 URI not enabled",
           "v2UriUnsupported": "WalletConnect V2 URI not enabled",
-          "disclaimerBody": "Shapeshift cannot ensure the safety or security of third-party applications. By using WalletConnect, you assume full responsibility for any risks involved."
+          "disclaimerBody": "ShapeShift cannot ensure the safety or security of third-party applications. By using WalletConnect, you assume full responsibility for any risks involved."
         },
         "sessionProposal": {
           "dAppInfo": "dApp Info",
@@ -2298,23 +2348,6 @@
           "prevPage": "Previous Page"
         }
       }
-    }
-  },
-  "features": {
-    "yat": {
-      "banner": {
-        "title": "Get a Yat",
-        "description": "Your Yat is your universal emoji username, website URL, payment address, and more."
-      },
-      "modal": {
-        "title": "Successfully linked Yat"
-      },
-      "linkedYat": "Linked Yat",
-      "yatConnected": "Yat Connected!",
-      "usdcAddress": "Yat USDC address",
-      "ethAddress": "Yat ETH address",
-      "noAddressFound": "No %{symbol} address found",
-      "viewInApp": "View in ShapeShift Mobile App"
     }
   },
   "gasInput": {
@@ -2392,6 +2425,8 @@
     "pool": "Pool",
     "poolDepth": "Pool Depth",
     "poolDepthDescription": "The healthiness of the pool",
+    "status": "Status",
+    "statusDescription": "The status of the pool",
     "totalDebtBalance": "Total Debt Balance",
     "totalDebtBalanceDescription": "Cumulative Debt Balance in the lending pool",
     "totalCollateral": "Total Collateral",
@@ -2436,6 +2471,7 @@
     "repayNotice": "To get back your collateral you will need to repay 100% of your debt.",
     "feesNotice": "Fees occurred on the collateral you will receive back after repaying 100% of your debt",
     "refetchQuote": "Refetch Quote",
+    "haltedAlert": "THORFi services (Lending, Savers and RUNEPool) are currently paused on THORChain. We apologize for any inconvenience.",
     "faq": {
       "title": "FAQ",
       "lending": {
@@ -2483,15 +2519,19 @@
     "simulateBody": "Use this handy calculator to determine your total fees and the discount you'll receive on your %{feature}. Simply adjust the sliders below to indicate your FOX holder amount and the %{featureLowerCase} size in fiat, and watch your potential savings unfold!",
     "featureSize": "%{feature} Size",
     "totalFee": "Total Fee",
-    "foxPowerDiscount": "FOX Power Discount",
+    "discountLabel": "%{discountType} Discount",
     "basedOnFee": "Based on a fee of: %{fee}",
     "feeSummary": "Fee Summary",
-    "simulateFee": "Simulate Discount",
+    "simulateFee": "Simulate FOX Discount",
     "freeUnderThreshold": "%{feature} under %{threshold} are always FREE",
-    "breakdownHeader": "Your FOX Power Discount",
-    "breakdownBody": "Below is a breakdown of your %{featureLowerCase} fees and the corresponding FOX Power Discount applied. Learn how much more you can save on the simulate tab.",
+    "breakdownHeader": "Your Discount",
+    "breakdownBody": "Below is a breakdown of your %{featureLowerCase} fees and the corresponding Discount applied. Learn how much more you can save on the simulate tab.",
     "featureFee": "%{feature} Fee",
-    "totalFeatureFee": "Total %{feature} Fee"
+    "totalFeatureFee": "Total %{feature} Fee",
+    "underThreshold": "Low Trade",
+    "thorHolder": "THORSwap Holder",
+    "foxHolder": "FOX Holder",
+    "foxWifHatHolder": "FOX Wif Hat Holder"
   },
   "chart": {
     "interval": {
@@ -2532,6 +2572,7 @@
     "unsupportedDemoWalletExplainer": "The demo wallet is not supported, please connect to a wallet to use this feature.",
     "unsupportedNetworkExplainer": "Your wallet isn't connected to %{network}. Please connect this chain or switch to a wallet that supports this network.",
     "unsupportedNetworksExplainer": "Your wallet isn't connected to %{network1} and %{network2}. Please connect this chain or switch to a wallet that supports these networks.",
+    "instabilityWarning": "Users are currently experiencing refunds while depositing to THORChain pools. Please proceed with caution.",
     "shareOfPool": "Share of Pool",
     "assetDepositAmount": "%{asset} Deposit Amount",
     "totalLiquidity": "Total Liquidity",
@@ -2811,7 +2852,7 @@
     "foxWifHat": {
       "title": "FOX Wif Hat",
       "description": "Claim your FOXwifhat. Act fast - discounts decay over time. The more FOX or FOXwifhat you hold, the more you save. Stack more FOX tokens for continuous savings plus revenue sharing, governance, and yield farming perks. Learn more about those programs on the rest of this page.",
-      "discount": "*The discount decreases linearly over time, expiring on XX/XX/2025. Take advantage of your XX% discount before it decreases further!",
+      "discount": "*The discount decreases linearly over time, expiring on %{date}. Take advantage of your %{percent}% discount before it decreases further!",
       "claim": "Claim",
       "claimed": "Claimed",
       "discountText": "*%{percent}% off trade fees",

@@ -23,7 +23,6 @@ export type FeatureFlags = {
   Base: boolean
   ThorSwap: boolean
   ThorSwapStreamingSwaps: boolean
-  Yat: boolean
   WalletConnectToDapps: boolean
   WalletConnectToDappsV2: boolean
   SaversVaults: boolean
@@ -38,7 +37,6 @@ export type FeatureFlags = {
   Jaypegz: boolean
   ArbitrumBridge: boolean
   PortalsSwap: boolean
-  CovalentJaypegs: boolean
   Chatwoot: boolean
   AdvancedSlippage: boolean
   WalletConnectV2: boolean
@@ -52,7 +50,6 @@ export type FeatureFlags = {
   LedgerWallet: boolean
   ThorchainSwapLongtail: boolean
   ThorchainSwapL1ToLongtail: boolean
-  ShapeShiftMobileWallet: boolean
   AccountManagement: boolean
   AccountManagementLedger: boolean
   RFOX: boolean
@@ -76,10 +73,11 @@ export type FeatureFlags = {
   ChainflipDca: boolean
   ThorFreeFees: boolean
   JupiterSwap: boolean
-  NewTradeFlow: boolean
   NewWalletFlow: boolean
   FoxPageFoxWifHatSection: boolean
   NewLimitFlow: boolean
+  ThorchainSwapperVolatilityAck: boolean
+  ThorchainPoolsInstabilityWarning: boolean
 }
 
 export type Flag = keyof FeatureFlags
@@ -127,7 +125,6 @@ const initialState: Preferences = {
     Base: getConfig().REACT_APP_FEATURE_BASE,
     ThorSwap: getConfig().REACT_APP_FEATURE_THOR_SWAP,
     ThorSwapStreamingSwaps: getConfig().REACT_APP_FEATURE_THOR_SWAP_STREAMING_SWAPS,
-    Yat: getConfig().REACT_APP_FEATURE_YAT,
     WalletConnectToDappsV2: getConfig().REACT_APP_FEATURE_WALLET_CONNECT_TO_DAPPS_V2,
     WalletConnectToDapps: getConfig().REACT_APP_FEATURE_WALLET_CONNECT_TO_DAPPS,
     SaversVaults: getConfig().REACT_APP_FEATURE_SAVERS_VAULTS,
@@ -136,7 +133,6 @@ const initialState: Preferences = {
     Cowswap: getConfig().REACT_APP_FEATURE_COWSWAP,
     ZrxSwap: getConfig().REACT_APP_FEATURE_ZRX_SWAP,
     LifiSwap: getConfig().REACT_APP_FEATURE_LIFI_SWAP,
-    CovalentJaypegs: getConfig().REACT_APP_FEATURE_COVALENT_JAYPEGS,
     Mixpanel: getConfig().REACT_APP_FEATURE_MIXPANEL,
     DynamicLpAssets: getConfig().REACT_APP_FEATURE_DYNAMIC_LP_ASSETS,
     ReadOnlyAssets: getConfig().REACT_APP_FEATURE_READ_ONLY_ASSETS,
@@ -155,7 +151,6 @@ const initialState: Preferences = {
     LedgerWallet: getConfig().REACT_APP_FEATURE_LEDGER_WALLET,
     ThorchainSwapLongtail: getConfig().REACT_APP_FEATURE_THORCHAINSWAP_LONGTAIL,
     ThorchainSwapL1ToLongtail: getConfig().REACT_APP_FEATURE_THORCHAINSWAP_L1_TO_LONGTAIL,
-    ShapeShiftMobileWallet: getConfig().REACT_APP_FEATURE_SHAPESHIFT_MOBILE_WALLET,
     AccountManagement: getConfig().REACT_APP_FEATURE_ACCOUNT_MANAGEMENT,
     AccountManagementLedger: getConfig().REACT_APP_FEATURE_ACCOUNT_MANAGEMENT_LEDGER,
     RFOX: getConfig().REACT_APP_FEATURE_RFOX,
@@ -179,10 +174,12 @@ const initialState: Preferences = {
     SolanaSwapper: getConfig().REACT_APP_FEATURE_SWAPPER_SOLANA,
     ThorFreeFees: getConfig().REACT_APP_FEATURE_THOR_FREE_FEES,
     JupiterSwap: getConfig().REACT_APP_FEATURE_JUPITER_SWAP,
-    NewTradeFlow: getConfig().REACT_APP_FEATURE_NEW_TRADE_FLOW,
     NewWalletFlow: getConfig().REACT_APP_FEATURE_NEW_WALLET_FLOW,
     FoxPageFoxWifHatSection: getConfig().REACT_APP_FEATURE_FOX_PAGE_FOX_WIF_HAT_SECTION,
     NewLimitFlow: getConfig().REACT_APP_FEATURE_NEW_LIMIT_FLOW,
+    ThorchainSwapperVolatilityAck: getConfig().REACT_APP_FEATURE_THORCHAIN_SWAPPER_ACK,
+    ThorchainPoolsInstabilityWarning:
+      getConfig().REACT_APP_FEATURE_THORCHAIN_POOLS_INSTABILITY_WARNINGS,
   },
   selectedLocale: simpleLocale(),
   balanceThreshold: '0',

@@ -27,7 +27,7 @@ import {
 import { TransactionExecutionState } from 'state/slices/tradeQuoteSlice/types'
 import { useAppSelector, useSelectorWithArgs } from 'state/store'
 
-import { StepperStep } from '../MultiHopTradeConfirm/components/StepperStep'
+import { StepperStep } from '../TradeConfirm/StepperStep'
 import { TxLabel } from '../TradeConfirm/TxLabel'
 import { useStepperSteps } from './hooks/useStepperSteps'
 
@@ -144,7 +144,8 @@ export const InnerSteps = ({ isLoading }: InnerStepsProps) => {
             txHash={allowanceReset.txHash}
             explorerBaseUrl={sellAsset.explorerTxLink}
             accountId={sellAccountId}
-            swapperName={undefined} // no swapper base URL here, this is an allowance Tx
+            stepSource={undefined} // no swapper base URL here, this is an allowance Tx
+            quoteSwapperName={SwapperName.CowSwap}
           />
         )}
       </Flex>
@@ -160,7 +161,8 @@ export const InnerSteps = ({ isLoading }: InnerStepsProps) => {
             txHash={allowanceApproval.txHash}
             explorerBaseUrl={sellAsset.explorerTxLink}
             accountId={sellAccountId}
-            swapperName={undefined} // no swapper base URL here, this is an allowance Tx
+            stepSource={undefined} // no swapper base URL here, this is an allowance Tx
+            quoteSwapperName={SwapperName.CowSwap}
           />
         )}
       </Flex>

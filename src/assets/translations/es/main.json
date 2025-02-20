@@ -62,7 +62,6 @@
     "seeAll": "Ver Todo",
     "darkMode": "Modo Oscuro",
     "darkTheme": "Tema oscuro",
-    "lightTheme": "Tema claro",
     "rename": "Renombrar",
     "forget": "Olvidar?",
     "pending": "Pendiente",
@@ -189,7 +188,9 @@
     "update": "Actualizar",
     "apy": "RAE",
     "tbd": "por definir",
-    "installed": "Instalado"
+    "installed": "Instalado",
+    "others": "Otros",
+    "hardwareWallets": "Billeteras de Hardware"
   },
   "consentBanner": {
     "body": {
@@ -584,7 +585,7 @@
     "staking": "Staking",
     "itWillTake": "Tomará",
     "toUnlock": "para desbloquear tus %{assetSymbol} después de unstake. Las recompensas de staking deberán retirarse por separado.",
-    "assetStakingBalance": "%{assetName} Balance de Staking"
+    "assetStakingBalance": "%{assetSymbol} Balance de Staking"
   },
   "navBar": {
     "home": "Inicio",
@@ -1003,7 +1004,9 @@
     "tradeComplete": "Ahora tienes %{cryptoAmountFormatted} en tu billetera en %{chainName}.",
     "doAnotherTrade": "Hacer otro intercambio",
     "summary": "Resumen de Intercambio",
+    "estimatedCompletionTime": "Tiempo Estimado de Finalización",
     "transactionSuccessful": "Transacción exitosa, esperando confirmaciones",
+    "thorchainSwapperVolatilityAcknowledgementMessage": "El protocolo THORCHain está experimentando volatilidad. Proceda con cuidado y considere otras rutas disponibles.",
     "temp": {
       "tradeSuccess": "Intercambio completado",
       "tradeComplete": "Se recibió exitosamente %{symbol} en %{chainName}."
@@ -1025,7 +1028,7 @@
     "resetTitle": "Restablecimiento Asignación de Tokens",
     "fiatAmountOnChain": "%{amountFiatFormatted} en %{chainName}",
     "quote": {
-      "cantSetSlippage": "No podemos establecer un deslizamiento personalizado (%{userslippageFormatted}) para %{swapperName}",
+      "cantSetSlippage": "No podemos establecer un deslizamiento personalizado (%{userSlippageFormatted}) para %{swapperName}",
       "slippage": "Deslizamiento: %{slippageFormatted}"
     },
     "awaitingPermit2Approval": "Esperando transferencia de token",
@@ -1048,6 +1051,9 @@
     "placeOrderSuccess": "¡Éxito!",
     "placeOrderFailed": "Algo Salió Mal",
     "placeOrder": "Realizar Pedido",
+    "placeAnotherOrder": "Realizar Otro Pedido",
+    "orderSummary": "Resumen del Pedido",
+    "success": "Orden límite colocada con éxito",
     "cancel": {
       "cancelOrder": "Cancelar Orden Límite \n",
       "requestCancellation": "Sí, solicitar cancelación",
@@ -1072,6 +1078,10 @@
     "noOpenOrders": "No hay órdenes abiertas todavía",
     "noHistoricalOrders": "Aún no hay pedidos históricos.",
     "limitPriceIsPercentLowerThanMarket": "Precio límite es %{percent}% más bajo que precio de mercado",
+    "awaitingOrderPlacement": "Esperando la colocación de la orden en %{swapperName}",
+    "awaitingAllowanceApproval": "Esperando aprobación de la asignación",
+    "awaitingAllowanceReset": "Esperando restablecimiento de la asignación",
+    "orderPlacement": "Realizar pedido en %{swapperName}",
     "expiryOption": {
       "oneHour": "1 hora",
       "oneDay": "1 día",
@@ -1219,8 +1229,8 @@
         "error": {
           "invalid": "Contraseña debe coincidir",
           "required": "Se requiere confirmación de contraseña",
-          "length": "Su contraseña debe tener al menos %{longitud} caracteres",
-          "maxLength": "El apodo debe tener %{longitud} caracteres como máximo"
+          "length": "Su contraseña debe tener al menos %{length} caracteres",
+          "maxLength": "El apodo debe tener %{length} caracteres como máximo"
         }
       },
       "backupPassphrase": {
@@ -1343,14 +1353,14 @@
     },
     "withdraw": {
       "amountToWithdraw": "Cantidad a retirar",
-      "withdrawFrom": "Retirar de %{oportunidad}",
+      "withdrawFrom": "Retirar de %{opportunity}",
       "unstakeYour": "Retire su %{opportunity}",
       "footerDisclaimer": "Esta transacción requerirá una tarifa de gas por transacción.",
       "slippageSettings": "Ajustes de Deslizamiento",
       "withdrawType": "Tipo de Retiro",
       "instant": "iInstantáneo",
       "delayed": "7 - 14 días",
-      "fee": "%{fee}% %{símbolo} tarifa",
+      "fee": "%{fee}% %{symbol} tarifa",
       "noFee": "Sin cargo de %{symbol}",
       "requestWithdraw": "Solicitar Retiro",
       "withdrawFee": "Habrá una tarifa de gas por separado para retirar.",
@@ -1697,6 +1707,9 @@
       "dontAskAgain": "No volver a preguntar",
       "multiAccountUnsupported": "Cuentas múltiples no admitidas para esta cadena usando Snap Multicadena MetaMask"
     },
+    "coinbaseQR": {
+      "name": "Conectar Coinbase"
+    },
     "metaMaskSnapConfirm": {
       "title": "Instalar Snap Multicadena",
       "updateTitle": "Actualizar Snap Multicadena",
@@ -1766,7 +1779,7 @@
         "secretRecoveryPhraseRequired": "Frase de Recuperación Secreta requerida",
         "secretRecoveryPhraseTooShort": "Frase de Recuperación Secreta demasiado corta",
         "dragAndDrop": "Arrastre y Soltar o elija archivo",
-        "keystoreImportBody": "Sube archivo haciendo clic en buscar o arrastrándolo y soltándolo a continuación.",
+        "keystoreImportBody": "Importe el archivo haciendo clic en Explorar o arrastrándolo y soltándolo debajo.",
         "importKeystore": "Importar Keystore",
         "invalidKeystorePassword": "Contraseña Keystore inválida"
       },
@@ -1789,14 +1802,14 @@
         "selectHeader": "Importar Billetera",
         "keystoreHeader": "Billetera Keystore",
         "body": "Puede tener múltiples billeteras ShapeShift. Puede cargar, crear o importar usando una Frase de recuperación secreta.",
-        "selectBody": "Importa tu billetera usando tu frase de recuperación secreta o cargando tu archivo keystore.",
+        "selectBody": "Importar billetera usando tu frase de recuperación secreta o cargando tu archivo keystore.",
         "import": "Importar billetera",
         "secretRecoveryPhrase": "Frase Secreta de Recuperación",
         "twelveWordSeedPhrase": "Frase semilla de 12 palabras",
         "keystore": "Keystore",
         "create": "Crear billetera nueva",
         "load": "Billeteras guardadas",
-        "uploadKeystore": "Subir Archivo Keystore"
+        "importKeystore": "Importar Archivo Keystore"
       },
       "success": {
         "encryptingWallet": "Cifrando su billetera... si su navegador solicita almacenar datos en almacenamiento persistente, clic en 'Permitir'.",
@@ -1873,14 +1886,13 @@
         "skip": "Saltar",
         "shapeshiftWallet": "Billetera ShapeShift",
         "createNewWallet": "Crear una billetera nueva",
-        "shapeshiftNative": "Billetera Nativa ShapeShift",
         "addNewWallet": "Agregar nueva billetera",
         "comingFromThorswap": "¿Vienes de THORSwap?",
         "importExisting": "Importar existente",
         "importFromKeystore": "Importar desde keystore",
         "whatIsShapeshiftWallet": "¿Qué es la Billetera ShapeShift?",
         "yourDecentralizedGateway": "Tu portal de descentralización. Intercambia y gana Bitcoin, Ethereum, Solana y más desde una única billetera segura.",
-        "crossChainFreedom": "Libertad entre cadenas. Acceda a las mejores tarifas en múltiples exchanges descentralizados, sin necesidad de intermediarios",
+        "crossChainFreedom": "Libertad entre cadenas. Acceda a las mejores tarifas en múltiples exchanges descentralizados, sin necesidad de intermediarios.",
         "selfCustody": {
           "title": "Su Billetera ShapeShift es auto-custodia",
           "subTitle": "Tienes las llaves y eres el único que puede acceder a él.",
@@ -2256,7 +2268,7 @@
           "invalidUri": "URI no válido",
           "v1UriUnsupported": "WalletConnect V1 URI no habilitado",
           "v2UriUnsupported": "WalletConnect V2 URI no habilitado",
-          "disclaimerBody": "Shapeshift no puede garantizar la seguridad en las apps de terceros. Al utilizar WalletConnect, usted asume total responsabilidad por los riesgos que esto implique."
+          "disclaimerBody": "ShapeShift no puede garantizar la seguridad en las apps de terceros. Al utilizar WalletConnect, usted asume total responsabilidad por los riesgos que esto implique."
         },
         "sessionProposal": {
           "dAppInfo": "Info dApp",
@@ -2353,7 +2365,7 @@
     "description": "Descripción",
     "details": "Detalles",
     "attributes": "Atributos",
-    "aboutCollection": "Acerca de %{nombreColección}",
+    "aboutCollection": "Acerca de %{collectionName}",
     "emptyTitle": "¿Dónde fueron mis NFT?",
     "emptyBody": "No se preocupe, estamos en búsqueda de más NFT sorprendentes. Mientras tanto, sea libre de mirar este espacio blanco y reflexionar sobre el significado de la existencia.",
     "reportSpam": "Reportar Spam",
@@ -2380,6 +2392,8 @@
     "pool": "Piscina",
     "poolDepth": "Profundidad de la piscina",
     "poolDepthDescription": "La salud de su pool",
+    "status": "Estado",
+    "statusDescription": "El estado del pool",
     "totalDebtBalance": "Saldo total de la deuda",
     "totalDebtBalanceDescription": "Saldo de Deuda Acumulada en  conjunto de préstamos",
     "totalCollateral": "Total de garantía colateral",
@@ -2730,7 +2744,8 @@
     "emissionsPool": "Fondo de Emisiones %{symbol} (esta época)",
     "emissionsPoolHelper": "Cantidad total de recompensas que se distribuirán a %{symbol} participantes",
     "foxBurnAmount": "Cantidad FOX quemados (esta época)",
-    "pendingDistribution": "Distribución Pendiente"
+    "pendingDistribution": "Distribución Pendiente",
+    "selectRuneAddress": "Seleccione una dirección RUNE"
   },
   "markets": {
     "recommended": "Recomendado",
@@ -2797,11 +2812,12 @@
     },
     "foxWifHat": {
       "title": "FOX Wif Hat",
-      "description": "Es solo FOX con sombrero, no lo pienses demasiado. Disfruta un programa de descuento en cadena por tiempo limitado. A medida tu descuento se agote, aprende sobre FOX en el resto de la página y cambia FOX en cualquier momento para conservar tu descuento de tarifa. La tenencia que sea mayor te permite ahorrar dinero en la plataforma ShapeShift.",
-      "discount": "*El descuento disminuye linealmente con el tiempo y vence XX/XX/2025. ¡Aprovecha tu descuento del XX% antes que disminuya aún más!",
+      "description": "Reclama tu FOXwifhat. Actúa rápido: los descuentos se agotan con el tiempo. Cuanto más FOX o FOXwifhat tengas, más ahorrarás. Acumula más tokens FOX para obtener ahorros continuos, además de beneficios de distribución de ingresos, gobernanza y cultivo de rendimiento. Obtén más información sobre esos programas en el resto de esta página.",
+      "discount": "*El descuento disminuye linealmente con el tiempo y vence el %{date}. ¡Aprovecha tu descuento del %{percent}% antes de que disminuya aún más!",
       "claim": "Reclamar",
       "claimed": "Reclamado",
-      "discountText": "*%{percent}% descuento en tarifas de intercambio"
+      "discountText": "*%{percent}% descuento en tarifas de intercambio",
+      "noClaims": "No hay reclamaciones disponibles"
     },
     "governance": {
       "title": "Gobernancia",
@@ -2827,7 +2843,7 @@
       "getAddress": "No se pudo obtener dirección de billetera.",
       "getAccount": "No se pudo obtener la cuenta para: %{pubkey}.",
       "switchChainUnsupported": "Billetera no admite cambio de cadenas.",
-      "switchChainFailed": "No se pudo cambiar la cadena de billetera a %{chain}.",
+      "switchChainFailed": "No se pudo cambiar cadena de billetera. Intente cambiar manualmente la cadena activa de su billetera a %{chain}.",
       "buildTransaction": "Error al crear la transacción.",
       "signTransaction": "No se pudo firmar la transacción.",
       "signAndBroadcastTransaction": "No se pudo firmar ni transmitir la transacción.",

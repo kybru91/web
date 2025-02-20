@@ -12,7 +12,7 @@ import { useActions } from 'hooks/useActions'
 import { useWallet } from 'hooks/useWallet/useWallet'
 import { getMixPanel } from 'lib/mixpanel/mixPanelSingleton'
 import { MixPanelEvent } from 'lib/mixpanel/types'
-import { usePlaceLimitOrderMutation } from 'state/apis/limit-orders/limitOrderApi'
+import { limitOrderApi, usePlaceLimitOrderMutation } from 'state/apis/limit-orders/limitOrderApi'
 import {
   selectBuyAmountCryptoBaseUnit,
   selectInputSellAmountCryptoBaseUnit,
@@ -34,7 +34,6 @@ import { TransactionExecutionState } from 'state/slices/tradeQuoteSlice/types'
 import { useAppDispatch, useAppSelector, useSelectorWithArgs } from 'state/store'
 
 import { getMixpanelLimitOrderEventData } from '../LimitOrder/helpers'
-import { useSetIsApprovalInitiallyNeeded } from '../LimitOrder/hooks/useSetIsApprovalInitiallyNeeded'
 import { LimitOrderRoutePaths } from '../LimitOrder/types'
 import { SharedConfirm } from '../SharedConfirm/SharedConfirm'
 import { SharedConfirmBody } from '../SharedConfirm/SharedConfirmBody'
@@ -42,6 +41,7 @@ import { SharedConfirmFooter } from '../SharedConfirm/SharedConfirmFooter'
 import { TradeSuccess } from '../TradeSuccess/TradeSuccess'
 import { useAllowanceApproval } from './hooks/useAllowanceApproval'
 import { useAllowanceReset } from './hooks/useAllowanceReset'
+import { useSetIsApprovalInitiallyNeeded } from './hooks/useSetIsApprovalInitiallyNeeded'
 import { InnerSteps } from './InnerSteps'
 import { LimitOrderDetail } from './LimitOrderDetail'
 
@@ -62,7 +62,7 @@ export const LimitOrderConfirm = () => {
   const buyAmountCryptoBaseUnit = useAppSelector(selectBuyAmountCryptoBaseUnit)
   const quoteId = useAppSelector(selectActiveQuoteId)
   const sellAmountCryptoPrecision = useAppSelector(selectActiveQuoteSellAmountCryptoPrecision)
-  const buyAmountCryptoPrecision = useAppSelector(selectActiveQuoteBuyAmountCryptoPrecision)
+  const quoteBuyAmountCryptoPrecision = useAppSelector(selectActiveQuoteBuyAmountCryptoPrecision)
   const feeAsset = useAppSelector(selectActiveQuoteFeeAsset)
   const feeAssetRateUserCurrency = useAppSelector(selectActiveQuoteFeeAssetRateUserCurrency)
 
@@ -96,9 +96,10 @@ export const LimitOrderConfirm = () => {
     approvalNetworkFeeCryptoBaseUnit,
   } = useAllowanceApproval({
     activeQuote,
-    isQueryEnabled:
-      !!allowanceApproval.isInitiallyRequired &&
-      !!activeQuote &&
+    isQueryEnabled: !!allowanceApproval.isInitiallyRequired && !!activeQuote,
+    // Stop refetching when the approval tx is pending, but keep it enabled (see above) so we can leverage stale data, see
+    // https://github.com/shapeshift/web/issues/8702
+    isRefetchEnabled:
       orderSubmissionState === LimitOrderSubmissionState.AwaitingAllowanceApproval &&
       allowanceApproval.state !== TransactionExecutionState.Pending,
   })
@@ -109,9 +110,10 @@ export const LimitOrderConfirm = () => {
     allowanceResetNetworkFeeCryptoBaseUnit,
   } = useAllowanceReset({
     activeQuote,
-    isQueryEnabled:
-      !!allowanceReset.isInitiallyRequired &&
-      !!activeQuote &&
+    isQueryEnabled: !!allowanceReset.isInitiallyRequired && !!activeQuote,
+    // Stop refetching when the reset tx is pending, but keep it enabled (see above) so we can leverage stale data, see
+    // https://github.com/shapeshift/web/issues/8702
+    isRefetchEnabled:
       orderSubmissionState === LimitOrderSubmissionState.AwaitingAllowanceReset &&
       allowanceReset.state !== TransactionExecutionState.Pending,
   })
@@ -140,7 +142,7 @@ export const LimitOrderConfirm = () => {
           sellAsset={sellAsset}
           buyAsset={buyAsset}
           sellAmountCryptoPrecision={sellAmountCryptoPrecision}
-          buyAmountCryptoPrecision={buyAmountCryptoPrecision}
+          quoteBuyAmountCryptoPrecision={quoteBuyAmountCryptoPrecision}
         />
       )
     }
@@ -155,7 +157,7 @@ export const LimitOrderConfirm = () => {
     )
   }, [
     buyAmountCryptoBaseUnit,
-    buyAmountCryptoPrecision,
+    quoteBuyAmountCryptoPrecision,
     buyAsset,
     handleBack,
     innerStepsRendered,
@@ -288,7 +290,11 @@ export const LimitOrderConfirm = () => {
         const result = await placeLimitOrder({ quoteId, wallet })
 
         // Exit if the request failed.
-        if ((result as { error: unknown }).error || !result) {
+        if (
+          (result as { error: unknown }).error ||
+          !result ||
+          !(result as { data: unknown }).data
+        ) {
           setLimitOrderTxFailed(quoteId)
           return
         }
@@ -302,12 +308,22 @@ export const LimitOrderConfirm = () => {
           refetchType: 'all',
         })
 
+        // Clear the completed quote from the cache
+        dispatch(
+          limitOrderApi.util.invalidateTags([
+            {
+              type: 'limitOrderQuote',
+              id: quoteId,
+            },
+          ]),
+        )
+
         // Track event in mixpanel
         const eventData = getMixpanelLimitOrderEventData({
           sellAsset,
           buyAsset,
           sellAmountCryptoPrecision,
-          buyAmountCryptoPrecision,
+          buyAmountCryptoPrecision: quoteBuyAmountCryptoPrecision,
         })
         if (mixpanel && eventData) {
           mixpanel.track(MixPanelEvent.LimitOrderPlaced, eventData)
@@ -320,8 +336,9 @@ export const LimitOrderConfirm = () => {
     activeQuote?.params.accountId,
     allowanceApprovalMutation,
     allowanceResetMutation,
-    buyAmountCryptoPrecision,
+    quoteBuyAmountCryptoPrecision,
     buyAsset,
+    dispatch,
     isConnected,
     isDemoWallet,
     mixpanel,

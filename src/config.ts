@@ -68,8 +68,6 @@ const validators = {
   REACT_APP_MTPELERIN_REFERRAL_CODE: str(),
   REACT_APP_MTPELERIN_INTEGRATION_KEY: str(),
   REACT_APP_FRIENDLY_CAPTCHA_SITE_KEY: str(),
-  REACT_APP_ZAPPER_API_KEY: str(),
-  REACT_APP_COVALENT_API_KEY: str(),
   REACT_APP_FEATURE_LIFI_SWAP: bool({ default: false }),
   REACT_APP_FEATURE_COWSWAP: bool({ default: false }),
   REACT_APP_FEATURE_JAYPEGZ: bool({ default: false }),
@@ -84,7 +82,6 @@ const validators = {
   REACT_APP_FEATURE_ZRX_SWAP: bool({ default: false }),
   REACT_APP_FEATURE_THOR_SWAP: bool({ default: false }),
   REACT_APP_FEATURE_THOR_SWAP_STREAMING_SWAPS: bool({ default: false }),
-  REACT_APP_FEATURE_YAT: bool({ default: false }),
   REACT_APP_FEATURE_SAVERS_VAULTS: bool({ default: false }),
   REACT_APP_FEATURE_SAVERS_VAULTS_DEPOSIT: bool({ default: false }),
   REACT_APP_FEATURE_SAVERS_VAULTS_WITHDRAW: bool({ default: false }),
@@ -97,7 +94,6 @@ const validators = {
   REACT_APP_WALLET_CONNECT_TO_DAPPS_PROJECT_ID: str({ default: '' }),
   REACT_APP_WALLET_CONNECT_WALLET_PROJECT_ID: str({ default: '' }),
   REACT_APP_WALLET_CONNECT_RELAY_URL: str({ default: 'wss://relay.walletconnect.com' }),
-  REACT_APP_YAT_NODE_URL: url({ default: 'https://a.y.at' }),
   REACT_APP_TOKEMAK_STATS_URL: url({ default: 'https://stats.tokemaklabs.com/' }),
   REACT_APP_LOCAL_IP: str({ default: '192.168.1.222' }),
   REACT_APP_BOARDROOM_API_BASE_URL: url({
@@ -133,7 +129,6 @@ const validators = {
   REACT_APP_FEATURE_PORTALS_SWAPPER: bool({ default: false }),
   REACT_APP_FEATURE_ONE_INCH: bool({ default: false }),
   REACT_APP_SENTRY_DSN_URL: url(),
-  REACT_APP_FEATURE_COVALENT_JAYPEGS: bool({ default: false }),
   REACT_APP_ALCHEMY_API_KEY: str(),
   REACT_APP_ALCHEMY_SOLANA_BASE_URL: url(),
   REACT_APP_PORTALS_API_KEY: str(),
@@ -157,7 +152,6 @@ const validators = {
   REACT_APP_FEATURE_THORCHAIN_LP_WITHDRAW: bool({ default: false }),
   REACT_APP_FEATURE_THORCHAINSWAP_LONGTAIL: bool({ default: false }),
   REACT_APP_FEATURE_THORCHAINSWAP_L1_TO_LONGTAIL: bool({ default: false }),
-  REACT_APP_FEATURE_SHAPESHIFT_MOBILE_WALLET: bool({ default: false }),
   REACT_APP_FEATURE_ACCOUNT_MANAGEMENT: bool({ default: false }),
   REACT_APP_FEATURE_ACCOUNT_MANAGEMENT_LEDGER: bool({ default: false }),
   REACT_APP_FEATURE_RFOX: bool({ default: false }),
@@ -186,10 +180,11 @@ const validators = {
   REACT_APP_FEATURE_THOR_FREE_FEES: bool({ default: false }),
   REACT_APP_FEATURE_JUPITER_SWAP: bool({ default: false }),
   REACT_APP_JUPITER_API_URL: url({ default: JUPITER_API_URL }),
-  REACT_APP_FEATURE_NEW_TRADE_FLOW: bool({ default: false }),
   REACT_APP_FEATURE_NEW_WALLET_FLOW: bool({ default: false }),
   REACT_APP_FEATURE_FOX_PAGE_FOX_WIF_HAT_SECTION: bool({ default: false }),
   REACT_APP_FEATURE_NEW_LIMIT_FLOW: bool({ default: false }),
+  REACT_APP_FEATURE_THORCHAIN_SWAPPER_ACK: bool({ default: false }),
+  REACT_APP_FEATURE_THORCHAIN_POOLS_INSTABILITY_WARNINGS: bool({ default: false }),
 }
 
 function reporter<T>({ errors }: envalid.ReporterOptions<T>) {

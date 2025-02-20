@@ -22,11 +22,13 @@ export const usePortalsAssetsQuery = ({
   chainIds,
   sortBy,
   orderBy,
+  minApy,
 }: {
   enabled: boolean
   chainIds: ChainId[] | undefined
   sortBy?: SortOptionsKeys
   orderBy?: OrderDirection
+  minApy?: string
 }) => {
   const dispatch = useAppDispatch()
   const assets = useAppSelector(selectAssets)
@@ -34,11 +36,12 @@ export const usePortalsAssetsQuery = ({
   const { data: portalsPlatformsData } = useQuery({
     queryKey: ['portalsPlatforms'],
     queryFn: enabled ? () => fetchPortalsPlatforms() : skipToken,
+    // This should effectively be considered static as far as the lifecycle of the app/our usage is concerned
     staleTime: Infinity,
   })
 
   return useQuery({
-    queryKey: ['portalsAssets', { chainIds, orderBy, sortBy }],
+    queryKey: ['portalsAssets', { chainIds, orderBy, sortBy, minApy }],
     queryFn:
       enabled && portalsPlatformsData
         ? () =>
@@ -46,6 +49,7 @@ export const usePortalsAssetsQuery = ({
               limit: 10,
               chainIds,
               sortBy: sortBy === SortOptionsKeys.Volume ? 'volumeUsd1d' : 'apy',
+              minApy,
               sortDirection:
                 orderBy === OrderDirection.Ascending && sortBy !== SortOptionsKeys.MarketCap
                   ? 'asc'

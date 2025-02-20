@@ -138,6 +138,7 @@ export const useRfoxStake = ({
     assetId: stakingAsset?.assetId,
     spender: getStakingContract(stakingAssetId),
     from: stakingAssetAccountAddress,
+    isRefetchEnabled: true,
   })
 
   const allowanceCryptoPrecision = useMemo(() => {
@@ -292,7 +293,7 @@ export const useRfoxStake = ({
     if (!(maybeSafeApprovalTx && approvalTxHash && stakingAssetAccountId)) return
 
     return getTxLink({
-      name: undefined,
+      stepSource: undefined,
       defaultExplorerBaseUrl: stakingAssetFeeAsset?.explorerTxLink ?? '',
       txId: approvalTxHash,
       accountId: stakingAssetAccountId,

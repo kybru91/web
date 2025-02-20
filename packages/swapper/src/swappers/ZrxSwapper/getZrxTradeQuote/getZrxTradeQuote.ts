@@ -68,11 +68,15 @@ export async function getZrxTradeQuote(
   if (maybeZrxQuoteResponse.isErr()) return Err(maybeZrxQuoteResponse.unwrapErr())
   const zrxQuoteResponse = maybeZrxQuoteResponse.unwrap()
 
-  const { sellAmount, buyAmount, fees, permit2, transaction } = zrxQuoteResponse
+  const { sellAmount, buyAmount, fees, permit2, transaction, route } = zrxQuoteResponse
 
   const permit2Eip712 = permit2?.eip712
 
-  if (!isNativeEvmAsset(sellAsset.assetId) && !permit2Eip712) {
+  const isWrappedNative = route.fills.some(
+    fill => fill.source === 'Wrapped_Native' && fill.proportionBps === '10000',
+  )
+
+  if (!isNativeEvmAsset(sellAsset.assetId) && !isWrappedNative && !permit2Eip712) {
     return Err(
       makeSwapErrorRight({
         message: 'Missing required Permit2 metadata from 0x response',
@@ -130,10 +134,12 @@ export async function getZrxTradeQuote(
       // Slippage protection is always enabled for 0x api v2 unlike api v1 which was only supported on specific pairs.
       slippageTolerancePercentageDecimal,
       rate,
+      swapperName: SwapperName.Zrx,
       steps: [
         {
           estimatedExecutionTimeMs: undefined,
-          allowanceContract: isNativeEvmAsset(sellAsset.assetId) ? undefined : PERMIT2_CONTRACT,
+          allowanceContract:
+            isNativeEvmAsset(sellAsset.assetId) || isWrappedNative ? undefined : PERMIT2_CONTRACT,
           buyAsset,
           sellAsset,
           accountNumber,

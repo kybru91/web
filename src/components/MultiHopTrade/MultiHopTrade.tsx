@@ -1,17 +1,20 @@
 import type { AssetId } from '@shapeshiftoss/caip'
-import { KnownChainIds } from '@shapeshiftoss/types'
 import { assertUnreachable } from '@shapeshiftoss/utils'
 import { AnimatePresence } from 'framer-motion'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { MemoryRouter, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom'
-import { useFeatureFlag } from 'hooks/useFeatureFlag/useFeatureFlag'
+import { fromBaseUnit } from 'lib/math'
 import { selectAssetById } from 'state/slices/assetsSlice/selectors'
+import {
+  selectInputBuyAsset,
+  selectInputSellAmountCryptoBaseUnit,
+  selectInputSellAsset,
+} from 'state/slices/tradeInputSlice/selectors'
 import { tradeInput } from 'state/slices/tradeInputSlice/tradeInputSlice'
 import { useAppDispatch, useAppSelector } from 'state/store'
 
 import { LimitOrder } from './components/LimitOrder/LimitOrder'
-import { MultiHopTradeConfirm } from './components/MultiHopTradeConfirm/MultiHopTradeConfirm'
 import { QuoteList } from './components/QuoteList/QuoteList'
 import { SlideTransitionRoute } from './components/SlideTransitionRoute'
 import { TradeConfirm } from './components/TradeConfirm/TradeConfirm'
@@ -32,12 +35,17 @@ const TradeRouteEntries = [
 
 export type TradeCardProps = {
   defaultBuyAssetId?: AssetId
+  defaultSellAssetId?: AssetId
   isCompact?: boolean
+  isRewritingUrl?: boolean
 }
 
 type MatchParams = {
   chainId?: string
   assetSubId?: string
+  sellAssetSubId?: string
+  sellChainId?: string
+  sellAmountCryptoBaseUnit?: string
 }
 
 // dummy component to allow us to mount or unmount the `useGetTradeRates` hook conditionally
@@ -46,51 +54,104 @@ const GetTradeRates = () => {
   return <></>
 }
 
-export const MultiHopTrade = memo(({ defaultBuyAssetId, isCompact }: TradeCardProps) => {
-  const location = useLocation()
-  const dispatch = useAppDispatch()
-  const methods = useForm({ mode: 'onChange' })
-  const { assetSubId, chainId } = useParams<MatchParams>()
-  const [initialIndex, setInitialIndex] = useState<number | undefined>()
+export const MultiHopTrade = memo(
+  ({ defaultBuyAssetId, defaultSellAssetId, isCompact, isRewritingUrl }: TradeCardProps) => {
+    const location = useLocation()
+    const dispatch = useAppDispatch()
+    const methods = useForm({ mode: 'onChange' })
+    const { assetSubId, chainId, sellAssetSubId, sellChainId, sellAmountCryptoBaseUnit } =
+      useParams<MatchParams>()
+    const [initialIndex, setInitialIndex] = useState<number | undefined>()
+    const sellAsset = useAppSelector(selectInputSellAsset)
+    const buyAsset = useAppSelector(selectInputBuyAsset)
+    const history = useHistory()
+    const sellInputAmountCryptoBaseUnit = useAppSelector(selectInputSellAmountCryptoBaseUnit)
+    const [isInitialized, setIsInitialized] = useState(false)
 
-  const routeBuyAsset = useAppSelector(state => selectAssetById(state, `${chainId}/${assetSubId}`))
-  const defaultBuyAsset = useAppSelector(state => selectAssetById(state, defaultBuyAssetId ?? ''))
+    const buyAssetId = useMemo(() => {
+      if (defaultBuyAssetId) return defaultBuyAssetId
+      if (chainId && assetSubId) return `${chainId}/${assetSubId}`
+      return ''
+    }, [defaultBuyAssetId, chainId, assetSubId])
 
-  // Handle deep linked route from other pages
-  useEffect(() => {
-    if (initialIndex !== undefined) return
-    const incomingIndex = TradeRouteEntries.indexOf(location.pathname as TradeRoutePaths)
-    setInitialIndex(incomingIndex === -1 ? 0 : incomingIndex)
-  }, [initialIndex, location])
+    const sellAssetId = useMemo(() => {
+      if (defaultSellAssetId) return defaultSellAssetId
+      if (sellChainId && sellAssetSubId) return `${sellChainId}/${sellAssetSubId}`
+      return ''
+    }, [defaultSellAssetId, sellChainId, sellAssetSubId])
 
-  useEffect(() => {
-    dispatch(tradeInput.actions.clear())
+    const routeSellAsset = useAppSelector(state => selectAssetById(state, sellAssetId))
 
-    if (
-      routeBuyAsset?.chainId === KnownChainIds.SolanaMainnet ||
-      defaultBuyAsset?.chainId === KnownChainIds.SolanaMainnet
-    ) {
-      return
-    }
+    const routeBuyAsset = useAppSelector(state => selectAssetById(state, buyAssetId))
 
-    if (routeBuyAsset) {
-      dispatch(tradeInput.actions.setBuyAsset(routeBuyAsset))
-    } else if (defaultBuyAsset) {
-      dispatch(tradeInput.actions.setBuyAsset(defaultBuyAsset))
-    }
-  }, [defaultBuyAsset, defaultBuyAssetId, dispatch, routeBuyAsset])
+    // Handle deep linked route from other pages
+    useEffect(() => {
+      if (initialIndex !== undefined) return
+      const incomingIndex = TradeRouteEntries.indexOf(location.pathname as TradeRoutePaths)
+      setInitialIndex(incomingIndex === -1 ? 0 : incomingIndex)
+    }, [initialIndex, location])
 
-  // Prevent default behavior overriding deep linked route
-  if (initialIndex === undefined) return null
+    useEffect(() => {
+      // Absolutely needed or else we'll end up in a loop
+      if (isInitialized) return
 
-  return (
-    <FormProvider {...methods}>
-      <MemoryRouter initialEntries={TradeRouteEntries} initialIndex={initialIndex}>
-        <TradeRoutes isCompact={isCompact} />
-      </MemoryRouter>
-    </FormProvider>
-  )
-})
+      if (routeBuyAsset) {
+        dispatch(tradeInput.actions.setBuyAsset(routeBuyAsset))
+      }
+
+      if (routeSellAsset) {
+        dispatch(tradeInput.actions.setSellAsset(routeSellAsset))
+      }
+
+      if (sellAmountCryptoBaseUnit && routeSellAsset) {
+        dispatch(
+          tradeInput.actions.setSellAmountCryptoPrecision(
+            fromBaseUnit(sellAmountCryptoBaseUnit, routeSellAsset.precision),
+          ),
+        )
+      }
+
+      setIsInitialized(true)
+    }, [dispatch, routeBuyAsset, routeSellAsset, sellAmountCryptoBaseUnit, isInitialized])
+
+    useEffect(() => {
+      if (isRewritingUrl) {
+        const sellAmountBaseUnit = sellInputAmountCryptoBaseUnit ?? sellAmountCryptoBaseUnit ?? ''
+
+        history.push(`/trade/${buyAsset.assetId}/${sellAsset.assetId}/${sellAmountBaseUnit ?? ''}`)
+      }
+    }, [
+      isInitialized,
+      isRewritingUrl,
+      buyAsset,
+      sellAsset,
+      routeBuyAsset?.assetId,
+      routeSellAsset?.assetId,
+      sellAmountCryptoBaseUnit,
+      history,
+      sellInputAmountCryptoBaseUnit,
+      routeBuyAsset,
+      routeSellAsset,
+    ])
+
+    useEffect(() => {
+      return () => {
+        dispatch(tradeInput.actions.clear())
+      }
+    }, [dispatch])
+
+    // Prevent default behavior overriding deep linked route
+    if (initialIndex === undefined) return null
+
+    return (
+      <FormProvider {...methods}>
+        <MemoryRouter initialEntries={TradeRouteEntries} initialIndex={initialIndex}>
+          <TradeRoutes isCompact={isCompact} />
+        </MemoryRouter>
+      </FormProvider>
+    )
+  },
+)
 
 type TradeRoutesProps = {
   isCompact?: boolean
@@ -99,7 +160,6 @@ type TradeRoutesProps = {
 const TradeRoutes = memo(({ isCompact }: TradeRoutesProps) => {
   const history = useHistory()
   const location = useLocation()
-  const isNewTradeFlowEnabled = useFeatureFlag('NewTradeFlow')
 
   const tradeInputRef = useRef<HTMLDivElement | null>(null)
 
@@ -141,7 +201,7 @@ const TradeRoutes = memo(({ isCompact }: TradeRoutesProps) => {
             />
           </Route>
           <Route key={TradeRoutePaths.Confirm} path={TradeRoutePaths.Confirm}>
-            {isNewTradeFlowEnabled ? <TradeConfirm /> : <MultiHopTradeConfirm />}
+            <TradeConfirm />
           </Route>
           <Route key={TradeRoutePaths.VerifyAddresses} path={TradeRoutePaths.VerifyAddresses}>
             <VerifyAddresses />

@@ -12,6 +12,7 @@ import {
   keyframes,
   Link,
   Stack,
+  useDisclosure,
 } from '@chakra-ui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -23,18 +24,16 @@ import OrangeFox from 'assets/orange-fox.svg'
 import { CircularProgress } from 'components/CircularProgress/CircularProgress'
 import { FadeTransition } from 'components/FadeTransition'
 import { LanguageSelector } from 'components/LanguageSelector'
+import { MobileWalletDialog } from 'components/MobileWalletDialog/MobileWalletDialog'
+import { MobileWalletDialogRoutes } from 'components/MobileWalletDialog/types'
 import { SlideTransitionY } from 'components/SlideTransitionY'
 import { RawText, Text } from 'components/Text'
-import { WalletActions } from 'context/WalletProvider/actions'
-import { KeyManager } from 'context/WalletProvider/KeyManager'
-import { useLocalWallet } from 'context/WalletProvider/local-wallet'
-import { MobileConfig } from 'context/WalletProvider/MobileWallet/config'
-import { getWallet, listWallets } from 'context/WalletProvider/MobileWallet/mobileMessageHandlers'
+import { listWallets } from 'context/WalletProvider/MobileWallet/mobileMessageHandlers'
 import type { RevocableWallet } from 'context/WalletProvider/MobileWallet/RevocableWallet'
 import { useQuery } from 'hooks/useQuery/useQuery'
 import { useWallet } from 'hooks/useWallet/useWallet'
 
-import { WalletCard } from './components/WalletCard'
+import { MobileWallestList } from './components/WalletList'
 
 const containerStyles = { touchAction: 'none' }
 
@@ -63,8 +62,7 @@ const BodyText: React.FC<TextProps> = props => (
 )
 
 export const MobileConnect = () => {
-  const { create, importWallet, dispatch, getAdapter, state } = useWallet()
-  const localWallet = useLocalWallet()
+  const { dispatch, state } = useWallet()
   const translate = useTranslate()
   const [wallets, setWallets] = useState<RevocableWallet[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -73,16 +71,20 @@ export const MobileConnect = () => {
   const scaleFadeAnimation = `${scaleFade} 0.6s cubic-bezier(0.76, 0, 0.24, 1)`
   const hasWallet = Boolean(state.walletInfo?.deviceId)
   const history = useHistory()
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const [defaultRoute, setDefaultRoute] = useState<MobileWalletDialogRoutes>(
+    MobileWalletDialogRoutes.Saved,
+  )
 
-  const handleCreate = useCallback(() => {
-    dispatch({ type: WalletActions.SET_WALLET_MODAL, payload: true })
-    create(KeyManager.Mobile)
-  }, [create, dispatch])
+  const handleOpenCreateWallet = useCallback(() => {
+    setDefaultRoute(MobileWalletDialogRoutes.Create)
+    onOpen()
+  }, [onOpen])
 
   const handleImport = useCallback(() => {
-    dispatch({ type: WalletActions.SET_WALLET_MODAL, payload: true })
-    importWallet(KeyManager.Mobile)
-  }, [dispatch, importWallet])
+    setDefaultRoute(MobileWalletDialogRoutes.Import)
+    onOpen()
+  }, [setDefaultRoute, onOpen])
 
   const query = useQuery<{ returnUrl: string }>()
   useEffect(() => {
@@ -126,56 +128,6 @@ export const MobileConnect = () => {
     }
   }, [wallets])
 
-  const handleWalletSelect = useCallback(
-    async (item: RevocableWallet) => {
-      const adapter = await getAdapter(KeyManager.Mobile)
-      const deviceId = item?.id
-      if (adapter && deviceId) {
-        const { name, icon } = MobileConfig
-        try {
-          const revoker = await getWallet(deviceId)
-          if (!revoker?.mnemonic) throw new Error(`Mobile wallet not found: ${deviceId}`)
-          if (!revoker?.id) throw new Error(`Revoker ID not found: ${deviceId}`)
-
-          const wallet = await adapter.pairDevice(revoker.id)
-          await wallet?.loadDevice({ mnemonic: revoker.mnemonic })
-          if (!(await wallet?.isInitialized())) {
-            await wallet?.initialize()
-          }
-          dispatch({
-            type: WalletActions.SET_WALLET,
-            payload: {
-              wallet,
-              name,
-              icon,
-              deviceId,
-              meta: { label: item.label },
-              connectedType: KeyManager.Mobile,
-            },
-          })
-          dispatch({
-            type: WalletActions.SET_IS_CONNECTED,
-            payload: true,
-          })
-          dispatch({ type: WalletActions.SET_WALLET_MODAL, payload: false })
-          dispatch({
-            type: WalletActions.SET_CONNECTOR_TYPE,
-            payload: { modalType: KeyManager.Mobile, isMipdProvider: false },
-          })
-
-          localWallet.setLocalWallet({ type: KeyManager.Mobile, deviceId })
-          localWallet.setLocalNativeWalletName(item?.label ?? 'label')
-        } catch (e) {
-          console.log(e)
-          setError('walletProvider.shapeShift.load.error.pair')
-        }
-      } else {
-        setError('walletProvider.shapeShift.load.error.pair')
-      }
-    },
-    [dispatch, getAdapter, localWallet],
-  )
-
   const handleToggleWallets = useCallback(() => {
     setHideWallets(!hideWallets) // allow users with saved wallets to toggle between saved and create/import
   }, [hideWallets])
@@ -201,7 +153,7 @@ export const MobileConnect = () => {
             <BodyText>{translate('connectWalletPage.mobileWelcomeBody')}</BodyText>
           </Stack>
           <Stack maxWidth='80%' mx='auto' spacing={4} width='full'>
-            <Button colorScheme='blue' size='lg-multiline' onClick={handleCreate}>
+            <Button colorScheme='blue' size='lg-multiline' onClick={handleOpenCreateWallet}>
               {translate('connectWalletPage.createANewWallet')}
             </Button>
             <Button variant='outline' size='lg-multiline' onClick={handleImport}>
@@ -237,14 +189,7 @@ export const MobileConnect = () => {
             <BodyText>{translate('connectWalletPage.mobileSelectBody')}</BodyText>
           </Stack>
           <Stack>
-            {wallets.map(wallet => (
-              <WalletCard
-                id={wallet.id}
-                key={wallet.id}
-                wallet={wallet}
-                onClick={handleWalletSelect}
-              />
-            ))}
+            <MobileWallestList />
             <Button size='lg-multiline' variant='outline' onClick={handleToggleWallets}>
               {translate('connectWalletPage.createOrImport')}
             </Button>
@@ -262,10 +207,9 @@ export const MobileConnect = () => {
     )
   }, [
     error,
-    handleCreate,
     handleImport,
+    handleOpenCreateWallet,
     handleToggleWallets,
-    handleWalletSelect,
     hideWallets,
     translate,
     wallets,
@@ -369,6 +313,7 @@ export const MobileConnect = () => {
           </SlideTransitionY>
         )}
       </AnimatePresence>
+      <MobileWalletDialog isOpen={isOpen} onClose={onClose} defaultRoute={defaultRoute} />
     </Flex>
   )
 }

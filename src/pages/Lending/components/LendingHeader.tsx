@@ -1,4 +1,7 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Card,
   CardBody,
   CardFooter,
@@ -22,6 +25,7 @@ import { Text } from 'components/Text'
 import { bnOrZero } from 'lib/bignumber/bignumber'
 
 import { useAllLendingPositionsData } from '../hooks/useAllLendingPositionsData'
+import { useIsLendingActive } from '../hooks/useIsLendingActive'
 
 const containerPadding = { base: 6, '2xl': 8 }
 const responsiveFlex = { base: 'auto', lg: 1 }
@@ -45,6 +49,7 @@ export const LendingHeader = () => {
       },
     ]
   }, [])
+  const { isLendingActive, isMimirLoading } = useIsLendingActive()
 
   const handleBack = useCallback(() => {
     history.push('/explore')
@@ -128,6 +133,13 @@ export const LendingHeader = () => {
               </CardFooter>
             </Card>
           </Flex>
+
+          {!isLendingActive && !isMimirLoading ? (
+            <Alert status='warning' variant='subtle'>
+              <AlertIcon />
+              <AlertDescription>{translate('lending.haltedAlert')}</AlertDescription>
+            </Alert>
+          ) : null}
         </Container>
         <TabMenu items={NavItems} />
       </Stack>

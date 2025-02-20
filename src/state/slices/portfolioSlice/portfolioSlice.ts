@@ -6,8 +6,11 @@ import type { AccountMetadataById } from '@shapeshiftoss/types'
 import cloneDeep from 'lodash/cloneDeep'
 import merge from 'lodash/merge'
 import uniq from 'lodash/uniq'
+import { accountManagement } from 'react-queries/queries/accountManagement'
 import { PURGE } from 'redux-persist'
 import { getChainAdapterManager } from 'context/PluginProvider/chainAdapterSingleton'
+import { queryClient } from 'context/QueryClientProvider/queryClient'
+import { fetchIsSmartContractAddressQuery } from 'hooks/useIsSmartContractAddress/useIsSmartContractAddress'
 import { getMixPanel } from 'lib/mixpanel/mixPanelSingleton'
 import { MixPanelEvent } from 'lib/mixpanel/types'
 import { BASE_RTK_CREATE_API_CONFIG } from 'state/apis/const'
@@ -96,7 +99,6 @@ export const portfolio = createSlice({
       // keep an index of what account ids belong to this wallet
       draftState.wallet.byId[walletId] = uniq(existingWalletAccountIds.concat(newWalletAccountIds))
     },
-
     clearWalletMetadata: (draftState, { payload }: { payload: WalletId }) => {
       const walletId = payload
       // Clear AccountIds that were previously associated with that wallet
@@ -105,6 +107,17 @@ export const portfolio = createSlice({
 
       // TODO(gomes): do we also want to clear draftState.accountMetadata entries themselves?
       // Theoretically, not doing so would make reloading these easier?
+    },
+    clearWalletPortfolioState: (draftState, { payload }: { payload: string }) => {
+      const walletId = payload
+
+      delete draftState.wallet.byId[walletId]
+      draftState.wallet.ids = draftState.wallet.ids.filter(id => id !== walletId)
+      delete draftState.accountMetadata.byId[walletId]
+      draftState.accountMetadata.ids = draftState.accountMetadata.ids.filter(id => id !== walletId)
+      delete draftState.accountBalances.byId[walletId]
+      draftState.accountBalances.ids = draftState.accountBalances.ids.filter(id => id !== walletId)
+      delete draftState.enabledAccountIds[walletId]
     },
     upsertPortfolio: (draftState, { payload }: { payload: Portfolio }) => {
       // upsert all
@@ -169,8 +182,26 @@ export const portfolioApi = createApi({
         try {
           const adapter = chainAdapters.get(chainId)
           if (!adapter) throw new Error(`no adapter for ${chainId} not available`)
-          const portfolioAccounts = { [pubkey]: await adapter.getAccount(pubkey) }
+          // We want the query to be Infinity staleTime and gcTime for later use, but we also want it to always refetch
+          // This is consumed by TransactionProvider and failure to do so means portfolio will *not* be updated
+          await queryClient.invalidateQueries({
+            queryKey: accountManagement.getAccount(accountId).queryKey,
+            refetchType: 'all',
+            exact: true,
+          })
+          const portfolioAccounts = {
+            [pubkey]: await queryClient.fetchQuery({
+              ...accountManagement.getAccount(accountId),
+              staleTime: Infinity,
+              // Never garbage collect me, I'm a special snowflake
+              gcTime: Infinity,
+            }),
+          }
+
           const nftCollectionsById = selectNftCollections(state)
+
+          // Prefetch smart contract checks - do *not* await/.then() me, this is only for the purpose of having this cached later
+          fetchIsSmartContractAddressQuery(pubkey, chainId)
 
           const data = await (async (): Promise<Portfolio> => {
             const assets = await makeAssets({ chainId, pubkey, state, portfolioAccounts })

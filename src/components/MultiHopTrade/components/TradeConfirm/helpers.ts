@@ -1,3 +1,5 @@
+import type { TradeQuoteStep } from '@shapeshiftoss/swapper'
+import { SwapperName } from '@shapeshiftoss/swapper'
 import type { TextPropTypes } from 'components/Text/Text'
 import { assertUnreachable } from 'lib/utils'
 import type { ApprovalExecutionMetadata } from 'state/slices/tradeQuoteSlice/types'
@@ -147,4 +149,9 @@ export const getCurrentStepperStepIndex = (
   if (!currentStep)
     return params.hopExecutionState === HopExecutionState.Pending ? 0 : activeSteps.length - 1
   return activeSteps.findIndex(([step]) => step === currentStep)
+}
+
+export const isPermit2Hop = (tradeQuoteStep: TradeQuoteStep | undefined) => {
+  if (!tradeQuoteStep) return false
+  return tradeQuoteStep.source === SwapperName.Zrx && !!tradeQuoteStep.allowanceContract
 }

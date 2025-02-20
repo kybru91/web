@@ -208,8 +208,8 @@ export const MobileNavBar = memo(() => {
         display={displayProp}
         className='mobile-nav'
       >
-        {allRoutes.map(route => (
-          <MobileNavLink key={route.path} {...route} />
+        {allRoutes.map((route, index) => (
+          <MobileNavLink key={route.path} {...route} order={index < 2 ? index + 1 : index + 2} />
         ))}
         <Flex alignItems='center' justifyContent='center' order={3}>
           <IconButton
@@ -222,7 +222,7 @@ export const MobileNavBar = memo(() => {
           />
         </Flex>
       </SimpleGrid>
-      <Dialog isOpen={isOpen} onClose={onClose} height='auto'>
+      <Dialog isOpen={isOpen} onClose={onClose} height='auto' isDisablingPropagation={false}>
         <DialogHeader />
         <DialogBody
           pb='calc(env(safe-area-inset-bottom) + 2rem)'
